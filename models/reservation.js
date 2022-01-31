@@ -16,6 +16,21 @@ class Reservation {
     this.notes = notes;
   }
 
+  async save() {
+    if(this.id === undefined) { // reservation is not saved to database so insert to database
+      const result = await db.query( 
+            `INSERT INTO reservations (customer_id, start_at, num_guests, notes)
+              values($1, $2, $3, $4) 
+              returning id`,
+              [this.customerId, this.startAt, this.numGuests, this.notes])
+              this.id = result.rows[0].id
+    } else { // reservation exist and update it
+      await db.query(`UPDATE reservations SET num_guests = $1, notes = $2
+                                      WHERE id = $3`,
+                                      [this.numGuests, this.notes, this.id] )
+    }
+  }
+
   /** formatter for startAt */
 
   getformattedStartAt() {
